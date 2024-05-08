@@ -179,7 +179,7 @@ class BasicWorldDemo {
 			if (this._eyeDropEnabled) {
 				this.SUB_grabColorWithRaycast(event);
 			} else {
-				if (!(this._mouseMode == 'build' || this._mouseMode == 'erase') || this._draggingMouseMovedYet) { return; }
+				if (!(this._mouseMode == 'build' || this._mouseMode == 'erase')) { return; }
 				//console.log('click');
 				this._clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 				this._clickMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -290,10 +290,10 @@ class BasicWorldDemo {
 	}
 	setMouseMode(mode) {
 		this._mouseMode = mode;
-		if (mode == 'paint') {
-			this._controls.enabled = false;
-		} else {
+		if (mode == 'pan') {
 			this._controls.enabled = true;
+		} else {
+			this._controls.enabled = false;
 		}
 	}
 	updateSlectedPaint(clrStr) {
