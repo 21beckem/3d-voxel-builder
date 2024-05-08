@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Mission Minecraft</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<script src="https://kit.fontawesome.com/0bddc0a0f7.js" crossorigin="anonymous"></script>
+	<script src="https://jscolor.com/release/2.5/jscolor-2.5.2/jscolor.js"></script>
+	<link rel="stylesheet" type="text/css" href="base.css">
+</head>
+
+<body>
+	<div id="topRightTools">
+		<button mode="build"><i class="fa-solid fa-hammer"></i></button>
+		<button mode="paint"><i class="fa-solid fa-paintbrush"></i></button>
+		<button mode="pan" class="active"><i class="fa-solid fa-hand"></i></button>
+		<button mode="erase"><i class="fa-solid fa-eraser"></i></button>
+	</div>
+	<div class="bottomToolBox" id="paintingTools" style="display:none">
+		<button data-jscolor="{
+			closeButton:true,
+			valueElement:'#ColorPickerValue',
+			onChange: 'updateColor(this)'
+		}" id="colorPickerInput" style="flex: 1; border:solid black 1px"></button>
+		<input type="text" value="#FF0000" id="ColorPickerValue" style="flex: 2; width: inherit;">
+		<button onclick="enableEyeDrop()" id="enableEyeDropBtn" style="flex: 1;"><i class="fa-solid fa-eye-dropper"></i></button>
+	</div>
+	<script src="world.js" type="module"></script>
+	<script>
+		HTMLCollection.prototype.forEach = function (x) {return Array.from(this).forEach(x);}
+		function _(x) {return document.getElementById(x);}
+		var _APP = globalThis._APP;
+
+		_('topRightTools').children.forEach(btn => {
+			btn.addEventListener('click', () => {
+				_('topRightTools').children.forEach(x => x.classList.remove('active'));
+				btn.classList.add('active');
+
+				const mode = btn.getAttribute('mode');
+				if (mode == 'build') {
+					_('paintingTools').style.display = '';
+				} else if (mode == 'paint') {
+					_('paintingTools').style.display = '';
+				} else {
+					_('paintingTools').style.display = 'none';
+				}
+				_APP.setMouseMode(mode);
+			})
+		});
+
+		function enableEyeDrop() {
+			_('enableEyeDropBtn').classList.add('active');
+			_APP.enableEyeDrop((clrStr)=> {
+				_('colorPickerInput').jscolor.fromString(clrStr);
+				_('enableEyeDropBtn').classList.remove('active');
+			})
+		}
+		function updateColor(picker) {
+			_APP.updateSlectedPaint(picker.toHEXString());
+		}
+		setTimeout(()=>{
+			jscolor.trigger('change');
+		},1000);
+
+	</script>
+</body>
+
+</html>
