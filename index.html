@@ -10,6 +10,10 @@
 </head>
 
 <body>
+	<div id="topLeftBtns" style="position: absolute;">
+		<input id="importBtn" type="file" accept=".entity">
+		<button id="exportBtn" onclick="exportBtn()">Export</button>
+	</div>
 	<div id="topRightTools">
 		<button mode="build"><i class="fa-solid fa-hammer"></i></button>
 		<button mode="paint"><i class="fa-solid fa-paintbrush"></i></button>
@@ -62,6 +66,44 @@
 			jscolor.trigger('change');
 		},1000);
 
+		document.getElementById('importBtn').onchange = function() {
+			var files = document.getElementById('importBtn').files;
+			//console.log(files);
+			if (files.length <= 0) {
+				return false;
+			}
+			var fr = new FileReader();
+			fr.onload = function(e) { 
+				//console.log(e);
+				var result = JSON.parse(e.target.result);
+				console.log(result);
+				_APP._builtBlocks = result;
+				_APP.SUB_saveTempVoxelBuilderBuilt();
+				location.reload();
+			}
+			fr.readAsText(files.item(0));
+		};
+		const downloadAsFile = (filename, dataObjToWrite) => {
+			const blob = new Blob([JSON.stringify(dataObjToWrite)], { type: "text/json" });
+			const link = document.createElement("a");
+
+			link.download = filename;
+			link.href = window.URL.createObjectURL(blob);
+			link.dataset.downloadurl = ["text/json", link.download, link.href].join(":");
+
+			const evt = new MouseEvent("click", {
+				view: window,
+				bubbles: true,
+				cancelable: true,
+			});
+
+			link.dispatchEvent(evt);
+			link.remove()
+		};
+		function exportBtn() {
+			if (Object.keys(_APP._builtBlocks).length <= 0) { return; }
+			downloadAsFile('object-' + new Date().valueOf() + '.entity', _APP._builtBlocks);
+		}
 	</script>
 </body>
 
