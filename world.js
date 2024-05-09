@@ -161,13 +161,36 @@ class BasicWorldDemo {
 	SUB_paintAtThisIntersect(intersect) {
 		if (this._eyeDropEnabled) { return; }
 		intersect.object.material.color = new THREE.Color(this._selectedPaint);
+		let pos = this.SUB_voxelPosToLoc(intersect.object.position);
+		this._builtBlocks[ pos.join(',') ] = this._selectedPaint.getHexString();
+		this.SUB_saveTempVoxelBuilderBuilt();
 	}
 	SUB_setupBuilding() {
+		this._buildSize = 5;
 		this._selectedPaint = new THREE.Color('#FF0000');
 		this._eyeDropEnabled = false;
 		this._builtVoxels = new Array();
 		this._canBuildOn = new Array();
 		this._canBuildOn.push(this._groundPlane);
+		this._builtBlocks = JSON.parse(localStorage.getItem('tempVoxelBuilderBuilt')) || {};
+
+		// create temp built blocks
+		Object.entries(this._builtBlocks).forEach(([key, val]) => {
+			//console.log(key, val);
+			let pos = this.SUB_voxelLocToPos(key.split(','));
+			//console.log(pos);
+			const voxel = new THREE.Mesh(
+				new THREE.BoxGeometry(this._buildSize, this._buildSize, this._buildSize),
+				new THREE.MeshPhongMaterial( {color: new THREE.Color('#'+val) } )
+			);
+			voxel.position.set( pos[0], pos[1], pos[2] );
+			voxel.castShadow = true;
+			voxel.receiveShadow = true;
+			voxel.userData.canBuildOn = true;
+			this._scene.add(voxel);
+			this._builtVoxels.push(voxel);
+			this._canBuildOn.push(voxel);
+		});
 
 		this._threejs.domElement.addEventListener('pointerdown', event => {
 			if (this._mouseMode != 'build' && this._mouseMode != 'erase') { return; }
@@ -186,7 +209,7 @@ class BasicWorldDemo {
 	
 	
 				this._raycaster.setFromCamera(this._clickMouse, this._camera);
-				let found = this._raycaster.intersectObjects(this._canBuildOn);
+				let found = this._raycaster.intersectObjects(this._mouseMode=='build' ? this._canBuildOn : this._builtVoxels);
 	
 				if (found.length > 0) {
 					if (found[0].object.userData.canBuildOn) {
@@ -204,19 +227,27 @@ class BasicWorldDemo {
 		this._scene.remove( intersect.object );
 		this._builtVoxels.splice( this._builtVoxels.indexOf( intersect.object ), 1 );
 		this._canBuildOn.splice( this._canBuildOn.indexOf( intersect.object ), 1 );
+		let pos = this.SUB_voxelPosToLoc(intersect.object.position);
+		delete this._builtBlocks[ pos.join(',') ];
+		this.SUB_saveTempVoxelBuilderBuilt();
 	}
 	SUB_buildCubeAtThisIntersect(intersect) {
-		const buildSize = 5;
 		const voxel = new THREE.Mesh(
-			new THREE.BoxGeometry(buildSize, buildSize, buildSize),
+			new THREE.BoxGeometry(this._buildSize, this._buildSize, this._buildSize),
 			new THREE.MeshPhongMaterial( {color: this._selectedPaint} )
 		);
 		voxel.position.copy(intersect.point).add(intersect.face.normal);
-		//console.log(voxel.position);
 		voxel.castShadow = true;
 		voxel.receiveShadow = true;
 		voxel.userData.canBuildOn = true;
-		voxel.position.divideScalar(buildSize).floor().multiplyScalar(buildSize).addScalar(buildSize / 2);
+		voxel.position.divideScalar(this._buildSize).floor().multiplyScalar(this._buildSize).addScalar(this._buildSize / 2);
+		let pos = this.SUB_voxelPosToLoc(voxel.position);
+		if (pos.join(',') in this._builtBlocks) {
+			return;
+		}
+		this._builtBlocks[ pos.join(',') ] = this._selectedPaint.getHexString();
+		this.SUB_saveTempVoxelBuilderBuilt();
+		//console.log(pos);
 		this._scene.add(voxel);
 		this._builtVoxels.push(voxel);
 		this._canBuildOn.push(voxel);
@@ -230,6 +261,17 @@ class BasicWorldDemo {
 			this.setMouseMode(this._mouseMode);
 			this._afterUsedEyeDropCallback(this._selectedPaint.getHexString());
 		}
+	}
+	SUB_voxelPosToLoc(position) {
+		let { x, y, z } = position;
+		let pos = [ x, y, z ];
+		return pos.map(x => x = (x - (this._buildSize / 2)) / this._buildSize );
+	}
+	SUB_voxelLocToPos(location) {
+		return location.map(x => x = (parseInt(x) * this._buildSize) + (this._buildSize / 2) );
+	}
+	SUB_saveTempVoxelBuilderBuilt() {
+		localStorage.setItem('tempVoxelBuilderBuilt', JSON.stringify(this._builtBlocks));
 	}
 
 	SUB_createSkybox() {
