@@ -10,8 +10,10 @@
 </head>
 
 <body>
-	<div id="topLeftBtns" style="position: absolute;">
+	<div id="topLeftBtns" style="position: absolute; width: 100%;">
 		<input id="importBtn" type="file" accept=".entity">
+		<button id="clearBtn" onclick="clearBtn()" style="position: absolute; right:0">Clear Map</button>
+		<br><br>
 		<button id="exportBtn" onclick="exportBtn()">Export</button>
 	</div>
 	<div id="topRightTools">
@@ -103,6 +105,12 @@
 		function exportBtn() {
 			if (Object.keys(_APP._builtBlocks).length <= 0) { return; }
 			downloadAsFile('object-' + new Date().valueOf() + '.entity', _APP._builtBlocks);
+		}
+		function clearBtn() {
+			if (confirm('Bro. Are you sure you want this? This will absolutely destroy all your hard work!!')) {
+				localStorage.setItem('tempVoxelBuilderBuilt', '{}');
+				location.reload();
+			}
 		}
 	</script>
 </body>

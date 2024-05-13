@@ -78,23 +78,6 @@ class BasicWorldDemo {
 
 		light = new THREE.AmbientLight(0x101010, 8.0);
 		this._scene.add(light);
-
-		// let spotLight = new THREE.SpotLight( 0xffffff, 100 );
-		// spotLight.position.set( 2.5, 5, 2.5 );
-		// spotLight.angle = Math.PI / 6;
-		// spotLight.penumbra = 1;
-		// spotLight.decay = 2;
-		// spotLight.distance = 0;
-
-		// spotLight.castShadow = true;
-		// spotLight.shadow.mapSize.width = 1024;
-		// spotLight.shadow.mapSize.height = 1024;
-		// spotLight.shadow.camera.near = 1;
-		// spotLight.shadow.camera.far = 10;
-		// spotLight.shadow.focus = 1;
-		// this._scene.add( spotLight );
-		// let lightHelper = new THREE.SpotLightHelper( spotLight );
-		// this._scene.add( lightHelper );
 	}
 
 	SUB_intersect(pos) {
